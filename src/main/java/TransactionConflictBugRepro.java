@@ -16,7 +16,7 @@ import java.util.logging.Logger;
 
 /**
  * This program demonstrates a bug in the datastore client where it, for a lookup performed in a transaction,
- * incorrectly incorrectly retries the lookup operation if it fails with an ABORTED error, without retrying the entire
+ * incorrectly retries the lookup operation if it fails with an ABORTED error, without retrying the entire
  * transaction. This results in a non-retryable INVALID_ARGUMENT error, which then causes the client to give up
  * completely instead of retrying the entire transaction when using the runInTransaction method.
  *
@@ -40,6 +40,9 @@ import java.util.logging.Logger;
  *       commits, causing t1 to fail.
  *
  *       Regardless, the incorrect retry behavior of the datastore client is the same in both cases.
+ *
+ *       It might not be possible to reproduce this issue using the datastore emulator as its behavior differs
+ *       from the real datastore service on transaction conflicts.
  */
 public class TransactionConflictBugRepro {
 
@@ -159,6 +162,7 @@ public class TransactionConflictBugRepro {
   }
 
   private static Datastore datastore() {
+
     final DatastoreOptions options = DatastoreOptions.newBuilder()
         .setNamespace("bug-repro-" + UUID.randomUUID())
         // Note: styx-staging is a legacy non-firestore datastore project
